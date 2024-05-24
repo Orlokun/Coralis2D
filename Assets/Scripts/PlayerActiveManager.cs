@@ -43,7 +43,7 @@ public class PlayerActiveManager : MonoBehaviour, IPlayerActiveManager
         ProcessLockTime();
     }
     private bool ChangedPlayerActive => Input.GetKeyDown(KeyCode.L) &&
-                                        _mPlayerControllers[_mActivePlayer].State.Grounded && _mCanUseChange;
+                                        _mPlayerControllers[_mActivePlayer].State.Grounded && _mPlayerControllers[_mActivePlayer].Input == Vector2.zero && _mCanUseChange;
     private void LaunchPlayerToggle()
     {
         _mCanUseChange = false;
