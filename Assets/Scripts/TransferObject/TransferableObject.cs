@@ -4,26 +4,60 @@ using UnityEngine;
 
 namespace TransferObject
 {
-    public class TransferableObject : MonoBehaviour, ITransferableObject
+    internal interface ITransferableObjectData
     {
+        public Guid Id { get; }
+        public void SetNewFaceOwner(PlayerEnum newOwner);
+        public Vector2 StartPosition { get; }
+        public PlayerEnum CurrentPlayerOwner { get; }
+    }
+    internal class TransferableObjectData : ITransferableObjectData
+    {
+        public Vector2 StartPosition => _mStartPosition;
         private Vector2 _mStartPosition;
-        private PlayerEnum _mCurrentLevelPlayerEnum;
+
+        public PlayerEnum CurrentPlayerOwner => _mCurrentPlayerOwner;
+        private PlayerEnum _mCurrentPlayerOwner;
+        private Guid _mId;
 
         public Guid Id => _mId;
-        private Guid _mId;
+        public void SetNewFaceOwner(PlayerEnum newOwner)
+        {
+            _mCurrentPlayerOwner = newOwner;
+        }
+        public TransferableObjectData(Vector2 mStartPosition, PlayerEnum mCurrentPlayerOwner, Guid mId)
+        {
+            _mStartPosition = mStartPosition;
+            _mCurrentPlayerOwner = mCurrentPlayerOwner;
+            _mId = mId;
+        }
         
-        private bool _mInitialized;
+    }
+
+    public class TransferableObject : MonoBehaviour, ITransferableObject
+    {
+        private ITransferableObjectData _mBaseData;
+        public Guid Id => _mBaseData.Id;
+        public PlayerEnum CurrentOwner => _mBaseData.CurrentPlayerOwner;
         public bool IsInit => _mInitialized;
 
-        public void Initialize()
+        private bool _mInitialized;
+
+        public void Init(PlayerEnum playerEnum)
         {
             if (_mInitialized)
             {
                 return;
             }
-            _mStartPosition = transform.position;
-            _mId = Guid.NewGuid();
+            _mBaseData = new TransferableObjectData(transform.localPosition, playerEnum, Guid.NewGuid());
             _mInitialized = true;
+        }
+
+        public void UpdatePosition(Transform newParent, PlayerEnum newOwner)
+        {
+            transform.SetParent(newParent);
+            transform.SetLocalPositionAndRotation(_mBaseData.StartPosition, transform.rotation);
+            _mBaseData.SetNewFaceOwner(newOwner);
         }
     }
 }

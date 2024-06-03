@@ -22,6 +22,7 @@ namespace LvlFacesManagement
     {
         Player1 = 1,
         Player2,
-        Player3
+        Player3,
+        Any
     }
 }

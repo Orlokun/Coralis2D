@@ -10,7 +10,7 @@ namespace Camera
         private IPlayerActiveManager _mPlayerActiveManager;
         [SerializeField]private CinemachineVirtualCamera _mBaseCamera;
         
-        [SerializeField]private List<LvlFaceObjectManager> MPlayerLevelTargets;
+        [SerializeField]private List<LevelFace> MPlayerLevelTargets;
         private Dictionary<PlayerEnum, GameObject> _mCameraTargets = new();
 
         private void Awake()

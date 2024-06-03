@@ -21,7 +21,7 @@ public class HierarchyIcon {
         markedObjects = new List<int> ();
         foreach (GameObject g in go) {
             // Example: mark all lights
-            if (g.GetComponent<LvlFaceObjectManager> () != null) markedObjects.Add (g.GetInstanceID ());
+            if (g.GetComponent<LevelFacesManager> () != null) markedObjects.Add (g.GetInstanceID ());
         }
     }
 
