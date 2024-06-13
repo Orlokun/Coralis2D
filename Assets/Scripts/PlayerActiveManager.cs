@@ -8,6 +8,9 @@ public interface IPlayerActiveManager
 {
     public event Action<PlayerEnum> ChangePlayerActive;
 }
+/// <summary>
+/// Locally manages which of the characters is being used.
+/// </summary>
 public class PlayerActiveManager : MonoBehaviour, IPlayerActiveManager
 {
     public event Action<PlayerEnum> ChangePlayerActive;

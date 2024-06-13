@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using TransferObject;
+using TransferObject.Interfaces_Data;
 using UnityEngine;
 
 namespace LvlFacesManagement
@@ -8,9 +10,10 @@ namespace LvlFacesManagement
     {
         public PlayerEnum PlayerOwner { get; }
         public void UpdateRowObjectsData(int row);
+        public void UpdateRowPlayerBasedObjectData(int row, PlayerEnum player);
         public Transform GetRowParentTransform(int rowIndex);
-        public List<ITransferableObject> GetRowObjects(int rowIndex);
-        void ClearRow(int currentRow);
+        public List<ISimpleTransferableObject> GetRowObjects(int rowIndex);
+        public List<IPlayerBasedTransferableObject> RowPlayerBasedObjects(int rowIndex, PlayerEnum player);
     }
     public class LevelFace : MonoBehaviour, ILevelFace
     {
@@ -19,7 +22,6 @@ namespace LvlFacesManagement
     
         public Dictionary<int, ILevelFaceRow> FaceRows => _mFaceRows;
         private Dictionary<int, ILevelFaceRow> _mFaceRows = new();
-        
         
         [SerializeField] private List<LevelFaceRow> MFaceRows;
 
@@ -64,9 +66,19 @@ namespace LvlFacesManagement
                 Debug.LogWarning("Row must be available for object transfer");
                 return;
             }
-            FaceRows[row].UpdateObjectsData();
+            FaceRows[row].UpdateSimpleTransferableObjectData();
         }
-        
+
+        public void UpdateRowPlayerBasedObjectData(int row, PlayerEnum player)
+        {
+            if (!FaceRows.ContainsKey(row))
+            {
+                Debug.LogWarning("Row must be available for object transfer");
+                return;
+            }
+            FaceRows[row].UpdatePlayerBasedTransferableObjectsData();        
+        }
+
         public Transform GetRowParentTransform(int rowIndex)
         {
             if (!FaceRows.ContainsKey(rowIndex))
@@ -77,7 +89,7 @@ namespace LvlFacesManagement
             return FaceRows[rowIndex].GetRowTransform;
         }
 
-        public List<ITransferableObject> GetRowObjects(int rowIndex)
+        public List<ISimpleTransferableObject> GetRowObjects(int rowIndex)
         {
             if (!FaceRows.ContainsKey(rowIndex))
             {
@@ -86,14 +98,13 @@ namespace LvlFacesManagement
             return FaceRows[rowIndex].ActiveTransferableObjects;
         }
 
-        public void ClearRow(int rowIndex)
+        public List<IPlayerBasedTransferableObject> RowPlayerBasedObjects(int rowIndex, PlayerEnum player)
         {
             if (!FaceRows.ContainsKey(rowIndex))
             {
-                Debug.LogWarning("[LevelFace.GetRowObjects] This Row must be available upon request");
-                return;
+                return null;
             }
-            _mFaceRows[rowIndex].ActiveTransferableObjects.Clear();
+            return FaceRows[rowIndex].PlayerTransferableObjects.FindAll(x=> x.InteractionOwner==player);
         }
     }
 }

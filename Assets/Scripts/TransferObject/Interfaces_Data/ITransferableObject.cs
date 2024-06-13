@@ -2,12 +2,12 @@
 using LvlFacesManagement;
 using UnityEngine;
 
-namespace TransferObject
+namespace TransferObject.Interfaces_Data
 {
     public interface ITransferableObject : IInitialize<PlayerEnum>
     {
         public Guid Id { get; }
-        public PlayerEnum CurrentOwner { get; }
+        public PlayerEnum CurrentFaceOwner { get; }
         public void UpdatePosition(Transform newParent, PlayerEnum newOwner);
     }
 }

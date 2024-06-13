@@ -10,6 +10,7 @@ namespace LvlFacesManagement
     {
         public Dictionary<PlayerEnum, ILevelFace> GetLevelFaces { get; }
         public void RotateLevelRow(int rotatedRow, int direction);
+        public void RotatePlayerBaseObjectsInRow(PlayerEnum player, int rotatedRow, int direction);
     }
 
     public class LevelFacesManager : MonoBehaviour, ILevelFacesManager
@@ -44,9 +45,7 @@ namespace LvlFacesManagement
             }
             foreach (var lvlFace in _mLvlFaces)
             {
-                //a. Update the transforms position first but not the data.
-                
-                //2. Get transferable objects
+                //2. Get transferable objects on each players screen
                 var rowObjects = lvlFace.Value.GetRowObjects(rotatedRow);
                 //3. Get new owner
                 var newOwner = GetChangedPlayerEnum(lvlFace.Key, direction);
@@ -60,6 +59,34 @@ namespace LvlFacesManagement
             UpdateObjectsData(rotatedRow);
         }
 
+        public void RotatePlayerBaseObjectsInRow(PlayerEnum player, int rotatedRow, int direction)
+        {
+            Dictionary<PlayerEnum, Transform> rowObjectHolder = new();
+            foreach (var lvlFace in _mLvlFaces)
+            {
+                //1. Get Row Parent Objects
+                rowObjectHolder.Add(lvlFace.Key, lvlFace.Value.GetRowParentTransform(rotatedRow));
+            }
+            foreach (var lvlFace in _mLvlFaces)
+            {
+                //2. Get transferable objects on each players screen
+                var rowObjects = lvlFace.Value.RowPlayerBasedObjects(rotatedRow, player);
+                if (rowObjects.Count == 0)
+                {
+                    continue;
+                }
+                
+                //3. Get new owner
+                var newOwner = GetChangedPlayerEnum(lvlFace.Key, direction);
+                //4. Update Position
+                rowObjects.ForEach(x =>
+                {
+                    x.UpdatePosition(rowObjectHolder[newOwner], newOwner);
+                });
+            }
+            UpdatePlayerBasedObjectsData(rotatedRow, player);
+        }
+
         private void UpdateObjectsData(int currentRow)
         {
             foreach (var lvlFace in _mLvlFaces)
@@ -67,7 +94,13 @@ namespace LvlFacesManagement
                 lvlFace.Value.UpdateRowObjectsData(currentRow);
             }
         }
-
+        private void UpdatePlayerBasedObjectsData(int currentRow, PlayerEnum interactionOwner)
+        {
+            foreach (var lvlFace in _mLvlFaces)
+            {
+                lvlFace.Value.UpdateRowPlayerBasedObjectData(currentRow, interactionOwner);
+            }
+        }
         private PlayerEnum GetChangedPlayerEnum(PlayerEnum currentOwner, int direction)
         {
             if (!IsPlayerAllowed(currentOwner))
@@ -101,11 +134,4 @@ namespace LvlFacesManagement
                    playerEnum == PlayerEnum.Player3;
         }
     }
-    
-    /*
-     1. s
-
-     */
-    
-
 }

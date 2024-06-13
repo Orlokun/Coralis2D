@@ -4,18 +4,27 @@ using UnityEngine;
 
 namespace InLevelObjects
 {
-    public class MapRotator : MonoBehaviour
+    public class MapRowRotator : MonoBehaviour
     {
-        [SerializeField] private PlayerEnum targetPlayer;
-        [SerializeField] private int mRotatedRow;
-        private bool _mCanRotateMap;
-        
-        
+        [SerializeField] protected PlayerEnum targetPlayer;
+        [SerializeField] protected int mRotatedRow;
+        protected bool MCanRotateMap;
+        protected ILevelFacesManager MLvlFacesManager;
+
+        protected virtual void Awake()
+        {
+            MLvlFacesManager = FindFirstObjectByType<LevelFacesManager>();
+            if (MLvlFacesManager == null)
+            {
+                Debug.LogWarning("General Level Faces Manager must be available on Initialization");
+            }
+        }
+
         public void OnTriggerEnter2D(Collider2D other)
         {
             if (HandlePlayerTrigger(other))
             {
-                _mCanRotateMap = true;
+                MCanRotateMap = true;
                 Debug.Log("Can rotate map!");
             }
         }
@@ -26,37 +35,36 @@ namespace InLevelObjects
             {
                 return false;
             }
-            if (targetPlayer == PlayerEnum.Any)
-            {
-                return true;
-            }
-            return targetPlayer == pController.PlayerRole;
+            return targetPlayer == PlayerEnum.Any || targetPlayer == pController.PlayerRole;
         }
         public void OnTriggerExit2D(Collider2D other)
         {
             if (other.TryGetComponent<PlayerController>(out var pController))
             {
-                if (pController.PlayerRole != targetPlayer || _mCanRotateMap == false)
+                if (pController.PlayerRole != targetPlayer || MCanRotateMap == false)
                 {
                     return;
                 }
-                _mCanRotateMap = false;
+                MCanRotateMap = false;
                 Debug.Log("Can't rotate map!");
             } 
         }
 
-        private void Update()
+        protected void Update()
         {
-            if (!_mCanRotateMap)
+            if (!MCanRotateMap)
             {
                 return;
             }
+            ManageInputRotation();
+        }
 
+        protected virtual void ManageInputRotation()
+        {
             if (Input.GetKeyDown(KeyCode.O))
             {
                 CallRotation(1);
             }
-
             if (Input.GetKeyDown(KeyCode.I))
             {
                 CallRotation(-1);
@@ -65,12 +73,7 @@ namespace InLevelObjects
 
         private void CallRotation(int direction)
         {
-            var lvlFacesManager = FindFirstObjectByType<LevelFacesManager>();
-            if (!lvlFacesManager)
-            {
-                return;
-            }
-            lvlFacesManager.RotateLevelRow(mRotatedRow, direction);
+            MLvlFacesManager.RotateLevelRow(mRotatedRow, direction);
         }
     }
 }
